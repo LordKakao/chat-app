@@ -20,7 +20,7 @@ public class WttrClient {
         return webClient.get()
                 .uri("/{city}?format=j1", city)
                 .retrieve()
-                .onStatus(HttpStatusCode::is2xxSuccessful,
+                .onStatus(HttpStatusCode::is4xxClientError,
                         clientResponse -> Mono.error(
                                 new ResponseStatusException(BAD_REQUEST, "Unable to fetch data")
                         ))
