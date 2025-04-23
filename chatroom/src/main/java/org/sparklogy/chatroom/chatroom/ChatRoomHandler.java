@@ -3,6 +3,7 @@ package org.sparklogy.chatroom.chatroom;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sparklogy.chatroom.weather.WeatherService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -10,11 +11,13 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Component
+@Slf4j
 @RequiredArgsConstructor
-@Component // Add this annotation to make it a Spring-managed bean
 public class ChatRoomHandler extends TextWebSocketHandler {
 
     private final WeatherService weatherService;
@@ -25,54 +28,46 @@ public class ChatRoomHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        // Generate a default username (you can change this to accept from client)
         sessions.put(session.getId(), session);
-        sendMessageToUser(session, "Welcome to the chat room!");
+        sendMessage(session, "Welcome to the chat room!");
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-        ChatMessage msg = null;
         try {
-            msg = objectMapper.readValue(message.getPayload(), ChatMessage.class);
-        } catch (JsonProcessingException ignored) {
+            ChatMessage msg = objectMapper.readValue(message.getPayload(), ChatMessage.class);
+            if(!users.containsKey(session.getId())) {
+                users.put(session.getId(), msg.getUsername());
+            }
 
-        }
-
-        // Handle @weather requests
-        if (msg.getMessage().startsWith("@weather")) {
-            String city = msg.getMessage().substring("@weather".length()).trim();
-            String weatherInfo = weatherService.getWeather(city);
-            sendMessageToAllUsers(weatherInfo);
-        } else {
-            // Broadcast the message to all users
-            sendMessageToAllUsers(msg.getUsername() + ": " + msg.getMessage());
+            if (msg.getMessage().startsWith("@weather")) {
+                String city = msg.getMessage().substring("@weather".length()).trim();
+                String weatherInfo = weatherService.getWeather(city);
+                sendMessageToAllConnections(weatherInfo);
+            } else {
+                // Broadcast the message to all users
+                sendMessageToAllConnections(msg.getUsername() + ": " + msg.getMessage());
+            }
+        } catch (JsonProcessingException e) {
+            log.error("Unable to read message ", e);
         }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        sendMessageToAllUsers(session.getId() + " has left the chat.");
-        sessions.remove(session.getId()); // Remove the session
+        sendMessageToAllConnections(users.get(session.getId()) + " has left the chat.");
+        sessions.remove(session.getId());
     }
 
-    // Helper method to send a message to all connected users
-    private void sendMessageToAllUsers(String message) {
-        sessions.values().forEach(session -> {
-            try {
-                session.sendMessage(new org.springframework.web.socket.TextMessage(message));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+    private void sendMessageToAllConnections(String message) {
+        sessions.values().forEach(session -> sendMessage(session, message));
     }
 
-    // Helper method to send a message to a specific user
-    private void sendMessageToUser(WebSocketSession session, String message) {
+    private void sendMessage(WebSocketSession session, String message) {
         try {
-            session.sendMessage(new org.springframework.web.socket.TextMessage(message));
-        } catch (Exception e) {
-            e.printStackTrace();
+            session.sendMessage(new TextMessage(message));
+        } catch (IOException e) {
+            log.error("Unable to send message ", e);
         }
     }
 }

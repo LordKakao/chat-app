@@ -12,7 +12,3 @@ info:
 
 server:
   port: 8080
-
-application:
-  weather:
-    url: http://localhost:8081/weather
