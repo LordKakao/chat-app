@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: weather-service
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+info:
+  application:
+    name: Weather Robot
+
+server:
+  port: 8081

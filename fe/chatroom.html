@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #messages {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 100px);
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #username {
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Chat Room</h1>
+
+    <!-- Username field -->
+    <input type="text" id="username" placeholder="Enter your username" />
+    <br /><br />
+
+    <!-- Display chat messages -->
+    <div id="messages"></div>
+
+    <!-- Message input and send button -->
+    <input type="text" id="message" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        let username;
+        let socket;
+
+        // Wait for the user to input a username
+        document.getElementById('username').addEventListener('change', function() {
+            username = this.value;
+            if (username) {
+                connectWebSocket();  // Connect to WebSocket when the username is provided
+            }
+        });
+
+        // Function to establish WebSocket connection
+        function connectWebSocket() {
+            socket = new WebSocket("ws://localhost:8080/chatroom");
+
+            socket.onopen = function() {
+                // Connection established, notify the user
+                addMessage("You have connected to the chat room.");
+            };
+
+            socket.onmessage = function(event) {
+                // Display incoming message from WebSocket
+                addMessage(event.data);
+            };
+
+            socket.onclose = function() {
+                addMessage("You have disconnected from the chat room.");
+            };
+
+            socket.onerror = function(error) {
+                addMessage("Error: " + error.message);
+            };
+        }
+
+        // Function to send messages through WebSocket
+        function sendMessage() {
+            const message = document.getElementById('message').value;
+            if (message && socket) {
+                // Send the message to the WebSocket server
+                socket.send(message);
+                document.getElementById('message').value = '';  // Clear the message input
+            }
+        }
+
+        // Function to append a message to the chat window
+        function addMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageElem = document.createElement('div');
+            messageElem.textContent = message;
+            messagesDiv.appendChild(messageElem);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the latest message
+        }
+    </script>
+
+</body>
+</html>
