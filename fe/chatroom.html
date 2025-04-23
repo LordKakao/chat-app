@@ -20,27 +20,23 @@
         }
 
         input[type="text"] {
+            width: calc(100% - 140px);
             padding: 10px;
             margin-right: 10px;
-            font-size: 14px;
         }
 
         #username {
-            width: 200px;
-        }
-
-        #message {
-            width: calc(100% - 120px);
+            width: calc(100% - 140px);
+            padding: 10px;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
 
         button {
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-        }
-
-        .top-bar {
-            margin-bottom: 10px;
+			width: 100px
         }
     </style>
 </head>
@@ -48,11 +44,9 @@
 
 <h1>Chat Room</h1>
 
-<!-- Connect section -->
-<div class="top-bar">
-    <input type="text" id="username" placeholder="Enter your username" />
-    <button onclick="connect()">Connect</button>
-</div>
+<!-- Username input -->
+<input type="text" id="username" placeholder="Enter your username" />
+<button id="connectBtn" onclick="connect()">Connect</button>
 
 <!-- Chat messages display -->
 <div id="messages"></div>
@@ -61,57 +55,40 @@
 <input type="text" id="message" placeholder="Type a message..." />
 <button onclick="sendMessage()">Send</button>
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
 <script>
-    let socket;
-    let connected = false;
+    let stompClient = null;
 
+    // Connect to WebSocket when "Connect" button is clicked
     function connect() {
-        const usernameInput = document.getElementById("username");
-        const username = usernameInput.value.trim();
+        const socket = new SockJS('http://localhost:8080/chatroom'); // Make sure this matches the WebSocket endpoint in your backend
+        stompClient = Stomp.over(socket);
 
-        if (!username) {
-            alert("Please enter a username before connecting.");
-            return;
-        }
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            document.getElementById('username').disabled = true;
+			document.getElementById('connectBtn').disabled = true;
+            addMessage('Connected to chat server.');
 
-        if (connected) {
-            alert("You are already connected.");
-            return;
-        }
-
-        socket = new WebSocket("ws://localhost:8080/chatroom");
-
-        socket.onopen = function () {
-            connected = true;
-            usernameInput.readOnly = true;
-            addMessage("Connected to chat server as " + username);
-        };
-
-        socket.onmessage = function (event) {
-            addMessage(event.data);
-        };
-
-        socket.onclose = function () {
-            connected = false;
-            addMessage("Disconnected from chat server.");
-        };
-
-        socket.onerror = function (error) {
-            addMessage("WebSocket error: " + error.message);
-        };
+            // Subscribe to the /topic/messages topic to receive messages
+            stompClient.subscribe('/topic/messages', function (messageOutput) {
+                addMessage(messageOutput.body);
+            });
+        }, function (error) {
+            console.error("Connection failed: " + error);
+        });
+		
     }
 
+    // Send a message to the server when "Send" button is clicked
     function sendMessage() {
         const username = document.getElementById("username").value.trim();
         const messageContent = document.getElementById("message").value.trim();
 
-        if (!connected) {
-            alert("You must connect first.");
-            return;
-        }
-
-        if (!messageContent) {
-            alert("Message cannot be empty.");
+        if (!username || !messageContent) {
+            alert("Username and message cannot be empty.");
             return;
         }
 
@@ -120,10 +97,12 @@
             message: messageContent
         };
 
-        socket.send(JSON.stringify(message));
-        document.getElementById("message").value = ""; // Clear input after send
+        // Send the message via STOMP
+        stompClient.send("/app/chat.send", {}, JSON.stringify(message));
+        document.getElementById("message").value = ""; // Clear input after sending
     }
 
+    // Add a message to the messages div
     function addMessage(msg) {
         const messagesDiv = document.getElementById("messages");
         const msgElement = document.createElement("div");

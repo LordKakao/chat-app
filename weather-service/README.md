@@ -1,17 +1,4 @@
-# Getting Started
+# Weather Service
+Aplication for fetching current weather for given city from https://wttr.in API.
 
-### Reference Documentation
-
-For further reference, please consider the following sections:
-
-* [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/3.4.4/gradle-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/3.4.4/gradle-plugin/packaging-oci-image.html)
-
-### Additional Links
-
-These additional references should also help you:
-
-* [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
-
-Swagger http://localhost:8081/swagger-ui/index.html
+Swagger documentation http://localhost:8081/swagger-ui/index.html

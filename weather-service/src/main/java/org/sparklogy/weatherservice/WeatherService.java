@@ -1,8 +1,9 @@
 package org.sparklogy.weatherservice;
 
 import lombok.RequiredArgsConstructor;
-import org.sparklogy.weatherservice.model.WeatherInfoResponse;
-import org.sparklogy.weatherservice.model.WttrResponse;
+import org.sparklogy.weatherservice.client.WttrClient;
+import org.sparklogy.weatherservice.dto.WeatherInfoResponse;
+import org.sparklogy.weatherservice.dto.WttrResponse;
 import org.springframework.stereotype.Service;
 
 @Service

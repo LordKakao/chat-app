@@ -6,7 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.sparklogy.weatherservice.WttrClient.WEATHER_API_URL;
+import static org.sparklogy.weatherservice.client.WttrClient.WEATHER_API_URL;
 
 @Configuration
 public class GlobalConfiguration {

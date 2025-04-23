@@ -1,4 +1,4 @@
-package org.sparklogy.chatroom.chatroom;
+package org.sparklogy.chatroom.chat;
 
 // File: WebSocketConfig.java
 

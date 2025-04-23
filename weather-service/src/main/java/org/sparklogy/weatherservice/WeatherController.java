@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.sparklogy.weatherservice.model.WeatherInfoResponse;
+import org.sparklogy.weatherservice.dto.WeatherInfoResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;

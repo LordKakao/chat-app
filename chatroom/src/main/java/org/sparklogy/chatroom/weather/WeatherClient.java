@@ -12,7 +12,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Component
 @RequiredArgsConstructor
 public class WeatherClient {
-
     private final WebClient webClient;
 
     public WeatherResponse getWeather(String city) {

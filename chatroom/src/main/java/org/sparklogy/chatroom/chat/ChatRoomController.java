@@ -1,7 +1,6 @@
-package org.sparklogy.chatroom.chatroom;
+package org.sparklogy.chatroom.chat;
 
 import lombok.RequiredArgsConstructor;
-import org.sparklogy.chatroom.weather.WeatherService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -15,6 +14,6 @@ public class ChatRoomController {
     @MessageMapping("/chat.send")
     @SendTo("/topic/messages")
     public String sendMessage(@Payload ChatMessage chatMessage) {
-        return chatRoomService.processMessage(chatMessage);
+        return chatRoomService.handleMessage(chatMessage);
     }
 }
