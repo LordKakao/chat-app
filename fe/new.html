@@ -76,7 +76,7 @@
 
     function sendMessage() {
         const username = document.getElementById("username").value.trim();
-        const message = document.getElementById("message").value.trim();
+        const messageContent = document.getElementById("message").value.trim();
 
         if (!username || !message) {
             alert("Username and message cannot be empty.");
@@ -85,7 +85,7 @@
 
         const message = {
             username: username,
-            message: message
+            message: messageContent
         };
 
         socket.send(JSON.stringify(message));
